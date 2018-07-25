@@ -43,7 +43,7 @@ public class BayernPortalMain
 
       out.println("Reading URLs to search on!!");
       String urlFilePath = "data" + File.separatorChar + "List_of_library_subscriptions_WEBPAGES_TO_SEARCH_ON_20180711.xlsx";
-      String[] searchUrls = new ExcelReader(urlFilePath).getURLArray();
+      String[][] searchUrls = new ExcelReader(urlFilePath).getURLArray();
       out.println("Done!!");
 
       out.println(" ");
@@ -52,7 +52,7 @@ public class BayernPortalMain
       out.println(" ");
 
       //Remove .exe for Mac
-      System.setProperty("webdriver.chrome.driver", "lib" + File.separatorChar + "chromedriver.exe");
+      System.setProperty("webdriver.chrome.driver", "driver" + File.separatorChar + "chromedriver.exe");
       
       ChromeOptions options = new ChromeOptions();
       options.addArguments("--headless");
@@ -65,10 +65,13 @@ public class BayernPortalMain
 
       out.println("Starting search...");
       out.println(" ");
-      String file = "output//output.csv";
+      String file = "output"+ File.separatorChar +"output.csv";
+      out.println("-------------------- Output -------------------------");
+      out.println("Keyword  |  URL  |  Library  |  Count");
       for (int urlCount = 0; urlCount < searchUrls.length; urlCount++)
       {
-         String url = searchUrls[urlCount];
+         String url = searchUrls[urlCount][2];
+         String library = searchUrls[urlCount][0];
          if (url != null)
          {
             driver.get(url);
@@ -80,24 +83,19 @@ public class BayernPortalMain
                String keyword1 = searchKeywords[keywordCount][0];
                String keyword2 = searchKeywords[keywordCount][1];
 
-               if(keywordCount == 26)
-               out.println("hello");
-                  
                if (keyword1 != null)
                {
                   int count = 0;
                   if (!"".equals(keyword1))
                   {
-                     count = getKeywordCountTemp(url, pageSource, keyword1);
-                     //count = getKeywordCount(url, keyword1);
-                     contentToWrite.append(keyword1 + "," + url + "," + count+ System.lineSeparator());
+                     count = getKeywordCountTemp(url, library, pageSource, keyword1);
+                     contentToWrite.append(keyword1 + "," + url + "," +library+"," + count+ System.lineSeparator());
                   }
 
                   if (count == 0 && !"".equals(keyword2))
                   {
-                     count = getKeywordCountTemp(url, pageSource, keyword2);
-//                     count = getKeywordCount(url, keyword2);
-                     contentToWrite.append(keyword2 + "," + url + "," + count+ System.lineSeparator());
+                     count = getKeywordCountTemp(url, library, pageSource, keyword2);
+                     contentToWrite.append(keyword2 + "," + url + "," +library+ "," + count+ System.lineSeparator());
                   }
                   
                }
@@ -106,24 +104,16 @@ public class BayernPortalMain
          }
       }
    }
-
-   // Old Method
-//   public int getKeywordCount(String url, String keyword)
-//   {
-//      List<WebElement> elementList = driver.findElements(By.xpath("//*[contains(text(),'" + keyword + "')]"));
-//      out.println(keyword + " word count: " + elementList.size() + " in URL:" + url);
-//      return elementList.size();
-//   }
    
-   public int getKeywordCountTemp(String url, String source, String keyword) {
-      int i = 0;
+   public int getKeywordCountTemp(String url, String library, String source, String keyword) {
+      int count = 0;
       Pattern p = Pattern.compile(keyword);
       Matcher m = p.matcher(source);
       while (m.find()) {
-          i++;
+          count++;
       }
-      out.println(keyword + " word count: " + i + " in URL:" + url);
-      return i;
+      out.println(keyword + "  | " + url + "  |  " + library + "  |  "+ count);
+      return count;
    }
 
    public void writeOutput(String file, String content)

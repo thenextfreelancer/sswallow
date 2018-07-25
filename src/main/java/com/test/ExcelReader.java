@@ -116,11 +116,11 @@ public class ExcelReader
       return value;
    }
 
-   public String[] getURLArray()
+   public String[][] getURLArray()
    {
       Row row;
       Cell cell;
-      String[] value = null;
+      String[][] value = null;
       try
       {
          FileInputStream inputStream = new FileInputStream(fileName);
@@ -139,9 +139,9 @@ public class ExcelReader
             int rows = sheet.getPhysicalNumberOfRows();
 
             // get number of cell from row
-//            int cells = sheet.getRow(cn).getPhysicalNumberOfCells();
+            int cells = sheet.getRow(cn).getPhysicalNumberOfCells();
 
-            value = new String[rows];
+            value = new String[rows][cells];
 
             for (int r = 0; r < rows; r++)
             {
@@ -151,35 +151,37 @@ public class ExcelReader
                row = sheet.getRow(r); // bring row
                if (row != null)
                {
-                  int c = 2;
-                  cell = row.getCell(c);
-                  if (cell != null)
+                  for (int c = 0; c < cells; c++)
                   {
-                     switch (cell.getCellTypeEnum())
+                     cell = row.getCell(c);
+                     if (cell != null)
                      {
-                     case FORMULA:
-                        // do nothing
-                        System.out.println("WARNING: Function Cell Found.");
-                        break;
+                        switch (cell.getCellTypeEnum())
+                        {
+                        case FORMULA:
+                           // do nothing
+                           System.out.println("WARNING: Function Cell Found.");
+                           break;
 
-                     case NUMERIC:
-                        value[r] = "" + cell.getNumericCellValue();
-                        break;
+                        case NUMERIC:
+                           value[r][c] = "" + cell.getNumericCellValue();
+                           break;
 
-                     case STRING:
-                        value[r] = "" + cell.getStringCellValue();
-                        break;
+                        case STRING:
+                           value[r][c] = "" + cell.getStringCellValue();
+                           break;
 
-                     case BLANK:
-                        value[r] = "";
-                        break;
+                        case BLANK:
+                           value[r][c] = "";
+                           break;
 
-                     case ERROR:
-                        // do nothing
-                        break;
-                     default:
+                        case ERROR:
+                           // do nothing
+                           break;
+                        default:
+                        }
                      }
-                  }
+                  } // for(c)
                }
             } // for(r)
          }
